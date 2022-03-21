@@ -1,1 +1,23 @@
 // TODO
+.pageContainer {
+  height: 100%;
+  width: 100vw;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .postDetails {
+    display: flex;
+
+    flex-direction: row;
+  }
+}
+
+.postContainer {
+  width: 45.0625rem;
+
+  color: white;
+
+  border: 1px solid red;
+}

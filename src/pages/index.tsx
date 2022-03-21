@@ -8,7 +8,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 import Link from 'next/link';
 
 import styles from './home.module.scss';
-import commonStyles from '../styles/common.module.scss';
+// import commonStyles from '../styles/common.module.scss';
 import { getPrismicClient } from '../services/prismic';
 
 interface Post {
@@ -60,6 +60,8 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
     return 'void';
   }
 
+  console.log(postsPagination.results_size);
+
   return (
     <div className={styles.container}>
       <main className={styles.postsList}>
@@ -96,15 +98,14 @@ export const getStaticProps: GetStaticProps = async () => {
     [Prismic.predicates.at('document.type', 'posts')],
     {
       fetch: ['posts.title', 'posts.subtitle', 'posts.author'],
-      pageSize: 3,
+      pageSize: 5,
     }
   );
-  console.log(postsResponse.results);
 
   const posts: Post[] = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      slug: post.slugs,
+      slug: post.uid,
       first_publication_date: format(
         new Date(post.first_publication_date),
         'dd MMM yyyy',
