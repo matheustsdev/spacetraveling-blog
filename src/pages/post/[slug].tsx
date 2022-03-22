@@ -1,11 +1,12 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { RichText } from 'prismic-dom';
 import Prismic from '@prismicio/client';
-import { FiCalendar } from 'react-icons/fi';
+import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
+import { formatDate } from '../../utils';
 
 interface Post {
   first_publication_date: string | null;
@@ -33,21 +34,36 @@ interface PromisePost {
 }
 
 export default function Post({ post }: PostProps): JSX.Element {
-  console.log(post);
   return (
     <main className={styles.pageContainer}>
       {post ? (
         <div className={styles.postContainer}>
-          <h1>{post.data.content[0].heading}</h1>
+          <br />
+          <h1>{post.data.title}</h1>
+          <br />
           <div className={styles.postDetails}>
-            <FiCalendar />
-            <p>asasasasasas</p>
+            <FiCalendar size={20} />
+            <p>{post.first_publication_date}</p>
+            <FiUser size={20} />
+            <p>{post.data.author}</p>
+            <FiClock size={20} />
+            <p>5 min</p>
           </div>
-          <div
-            dangerouslySetInnerHTML={{
-              __html: post.data.content[0].body[0].text,
-            }}
-          />
+          <div className={styles.postContent}>
+            {post.data.content.map(content => {
+              return (
+                <div key={post.first_publication_date + content.heading}>
+                  <h1>{content.heading}</h1>
+                  <div
+                    // eslint-disable-next-line react/no-danger
+                    dangerouslySetInnerHTML={{
+                      __html: RichText.asHtml(content.body),
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : (
         <h1>...Carregando</h1>
@@ -84,21 +100,12 @@ export async function getStaticProps(context): Promise<PromisePost> {
     });
 
   const post = {
-    first_publication_date: response.first_publication_date,
+    first_publication_date: formatDate(response.first_publication_date),
     data: {
       title: response.data.title,
       banner: response.data.banner,
       author: response.data.author,
-      content: [
-        {
-          heading: response.data.content[0].heading,
-          body: [
-            {
-              text: RichText.asHtml(response.data.content[0].body),
-            },
-          ],
-        },
-      ],
+      content: response.data.content,
     },
   };
 
