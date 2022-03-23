@@ -60,35 +60,40 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
     return 'void';
   }
 
-  console.log(postsPagination.results_size);
-
   return (
-    <div className={styles.container}>
-      <main className={styles.postsList}>
-        {posts.map(post => (
-          <Link href={`/post/${post.slug}`} key={post.uid}>
-            <div className={styles.postContainer}>
-              <h1>{post.data.title}</h1>
-              <p>{post.data.subtitle}</p>
-              <div>
-                <FiCalendar />
-                <p>{post.first_publication_date}</p>
-                <FiUser />
-                <p>{post.data.author}</p>
+    <>
+      <header className={styles.header}>
+        <div>
+          <img src="/images/logo.svg" alt="logo" />
+        </div>
+      </header>
+      <div className={styles.container}>
+        <main className={styles.postsList}>
+          {posts.map(post => (
+            <Link href={`/post/${post.slug}`} key={post.uid}>
+              <div className={styles.postContainer}>
+                <h1>{post.data.title}</h1>
+                <p>{post.data.subtitle}</p>
+                <div>
+                  <FiCalendar />
+                  <p>{post.first_publication_date}</p>
+                  <FiUser />
+                  <p>{post.data.author}</p>
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
-        {posts.length >= postsPagination.results_size ||
-        postsPagination.next_page === null ? (
-          <></>
-        ) : (
-          <button type="button" onClick={() => handleShowMorePosts()}>
-            Carregar mais posts
-          </button>
-        )}
-      </main>
-    </div>
+            </Link>
+          ))}
+          {posts.length >= postsPagination.results_size ||
+          postsPagination.next_page === null ? (
+            <></>
+          ) : (
+            <button type="button" onClick={() => handleShowMorePosts()}>
+              Carregar mais posts
+            </button>
+          )}
+        </main>
+      </div>
+    </>
   );
 }
 

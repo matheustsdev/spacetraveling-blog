@@ -6,11 +6,10 @@
   align-items: center;
   justify-content: center;
 
-  margin-bottom: 4rem;
-
   div {
     width: 700px;
     img {
+      cursor: pointer;
       height: 26px;
     }
   }
