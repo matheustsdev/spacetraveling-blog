@@ -1,12 +1,12 @@
 import { RichText } from 'prismic-dom';
 import Prismic from '@prismicio/client';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
-import { formatDate } from '../../utils';
-import { Header } from '../../components/Header';
 
 interface Post {
   first_publication_date: string | null;
@@ -50,52 +50,56 @@ interface StaticPathsProps {
   fallback: boolean;
 }
 export default function Post({ post }: PostProps): JSX.Element {
+  let totalString = 0;
+
+  post.data.content.forEach(body => {
+    body.body.forEach(string => {
+      totalString += string.text.split(' ').length;
+    });
+  });
+
+  const readTime = Math.ceil(totalString / 200);
+
   return (
-    <>
-      <Header />
-      <main className={styles.pageContainer}>
-        {post ? (
-          <div className={styles.postContainer}>
-            <div className={styles.imageContainer}>
-              <img
-                src={post.data.banner.url}
-                alt={`${post.data.title}-banner`}
-                style={{
-                  width: post.data.banner.dimensions.width,
-                  height: post.data.banner.dimensions.height,
-                }}
-              />
-            </div>
-            <h1>{post.data.title}</h1>
-            <div className={styles.postDetails}>
-              <FiCalendar size={20} />
-              <p>{post.first_publication_date}</p>
-              <FiUser size={20} />
-              <p>{post.data.author}</p>
-              <FiClock size={20} />
-              <p>5 min</p>
-            </div>
-            <div className={styles.postContent}>
-              {post.data.content.map(content => {
-                return (
-                  <div key={post.first_publication_date + content.heading}>
-                    <h2>{content.heading}</h2>
-                    <div
-                      // eslint-disable-next-line react/no-danger
-                      dangerouslySetInnerHTML={{
-                        __html: RichText.asHtml(content.body),
-                      }}
-                    />
-                  </div>
-                );
-              })}
-            </div>
+    <main className={styles.pageContainer}>
+      {post ? (
+        <div className={styles.postContainer}>
+          <div className={styles.imageContainer}>
+            <img src={post.data.banner.url} alt={post.data.banner.alt} />
           </div>
-        ) : (
-          <h1>...Carregando</h1>
-        )}
-      </main>
-    </>
+          <h1>{post.data.title}</h1>
+          <div className={styles.postDetails}>
+            <FiCalendar size={20} />
+            <p>
+              {format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+                locale: ptBR,
+              })}
+            </p>
+            <FiUser size={20} />
+            <p>{post.data.author}</p>
+            <FiClock size={20} />
+            <p>{readTime} min</p>
+          </div>
+          <div className={styles.postContent}>
+            {post.data.content.map(content => {
+              return (
+                <div key={post.first_publication_date + content.heading}>
+                  <h2>{content.heading}</h2>
+                  <div
+                    // eslint-disable-next-line react/no-danger
+                    dangerouslySetInnerHTML={{
+                      __html: RichText.asHtml(content.body),
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <h1>Carregando...</h1>
+      )}
+    </main>
   );
 }
 
@@ -129,7 +133,7 @@ export async function getStaticProps(
     });
 
   const post = {
-    first_publication_date: formatDate(response.first_publication_date),
+    first_publication_date: response.first_publication_date,
     data: {
       title: response.data.title,
       banner: response.data.banner,

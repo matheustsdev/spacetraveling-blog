@@ -61,39 +61,40 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
   }
 
   return (
-    <>
-      <header className={styles.header}>
-        <div>
-          <img src="/images/logo.svg" alt="logo" />
-        </div>
-      </header>
-      <div className={styles.container}>
-        <main className={styles.postsList}>
-          {posts.map(post => (
-            <Link href={`/post/${post.slug}`} key={post.uid}>
-              <div className={styles.postContainer}>
-                <h1>{post.data.title}</h1>
-                <p>{post.data.subtitle}</p>
-                <div>
-                  <FiCalendar />
-                  <p>{post.first_publication_date}</p>
-                  <FiUser />
-                  <p>{post.data.author}</p>
-                </div>
+    <div className={styles.container}>
+      <main className={styles.postsList}>
+        {posts.map(post => (
+          <Link href={`/post/${post.slug}`} key={post.uid}>
+            <div className={styles.postContainer}>
+              <h1>{post.data.title}</h1>
+              <p>{post.data.subtitle}</p>
+              <div>
+                <FiCalendar />
+                <p>
+                  {format(
+                    new Date(post.first_publication_date),
+                    'dd MMM yyyy',
+                    {
+                      locale: ptBR,
+                    }
+                  )}
+                </p>
+                <FiUser />
+                <p>{post.data.author}</p>
               </div>
-            </Link>
-          ))}
-          {posts.length >= postsPagination.results_size ||
-          postsPagination.next_page === null ? (
-            <></>
-          ) : (
-            <button type="button" onClick={() => handleShowMorePosts()}>
-              Carregar mais posts
-            </button>
-          )}
-        </main>
-      </div>
-    </>
+            </div>
+          </Link>
+        ))}
+        {posts.length >= postsPagination.results_size ||
+        postsPagination.next_page === null ? (
+          <></>
+        ) : (
+          <button type="button" onClick={() => handleShowMorePosts()}>
+            Carregar mais posts
+          </button>
+        )}
+      </main>
+    </div>
   );
 }
 
@@ -111,13 +112,7 @@ export const getStaticProps: GetStaticProps = async () => {
     return {
       uid: post.uid,
       slug: post.uid,
-      first_publication_date: format(
-        new Date(post.first_publication_date),
-        'dd MMM yyyy',
-        {
-          locale: ptBR,
-        }
-      ),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
