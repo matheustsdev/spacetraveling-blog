@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import { RichText } from 'prismic-dom';
 import Prismic from '@prismicio/client';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
@@ -60,45 +61,47 @@ export default function Post({ post }: PostProps): JSX.Element {
 
   const readTime = Math.ceil(totalString / 200);
 
+  const router = useRouter();
+
+  if (router.isFallback) {
+    return <p>Carregando...</p>;
+  }
+
   return (
     <main className={styles.pageContainer}>
-      {post ? (
-        <div className={styles.postContainer}>
-          <div className={styles.imageContainer}>
-            <img src={post.data.banner.url} alt={post.data.banner.alt} />
-          </div>
-          <h1>{post.data.title}</h1>
-          <div className={styles.postDetails}>
-            <FiCalendar size={20} />
-            <p>
-              {format(new Date(post.first_publication_date), 'dd MMM yyyy', {
-                locale: ptBR,
-              })}
-            </p>
-            <FiUser size={20} />
-            <p>{post.data.author}</p>
-            <FiClock size={20} />
-            <p>{readTime} min</p>
-          </div>
-          <div className={styles.postContent}>
-            {post.data.content.map(content => {
-              return (
-                <div key={post.first_publication_date + content.heading}>
-                  <h2>{content.heading}</h2>
-                  <div
-                    // eslint-disable-next-line react/no-danger
-                    dangerouslySetInnerHTML={{
-                      __html: RichText.asHtml(content.body),
-                    }}
-                  />
-                </div>
-              );
-            })}
-          </div>
+      <div className={styles.postContainer}>
+        <div className={styles.imageContainer}>
+          <img src={post.data.banner.url} alt={post.data.banner.alt} />
         </div>
-      ) : (
-        <h1>Carregando...</h1>
-      )}
+        <h1>{post.data.title}</h1>
+        <div className={styles.postDetails}>
+          <FiCalendar size={20} />
+          <p>
+            {format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+              locale: ptBR,
+            })}
+          </p>
+          <FiUser size={20} />
+          <p>{post.data.author}</p>
+          <FiClock size={20} />
+          <p>{readTime} min</p>
+        </div>
+        <div className={styles.postContent}>
+          {post.data.content.map(content => {
+            return (
+              <div key={post.first_publication_date + content.heading}>
+                <h2>{content.heading}</h2>
+                <div
+                  // eslint-disable-next-line react/no-danger
+                  dangerouslySetInnerHTML={{
+                    __html: RichText.asHtml(content.body),
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </main>
   );
 }
@@ -112,12 +115,14 @@ export const getStaticPaths = async (): Promise<StaticPathsProps> => {
     }
   );
 
+  const paths = posts.results.map(post => ({
+    params: {
+      slug: post.uid,
+    },
+  }));
+
   return {
-    paths: [
-      {
-        params: { slug: 'slug' },
-      },
-    ],
+    paths,
     fallback: true,
   };
 };
@@ -133,9 +138,11 @@ export async function getStaticProps(
     });
 
   const post = {
+    uid: response.uid,
     first_publication_date: response.first_publication_date,
     data: {
       title: response.data.title,
+      subtitle: response.data.subtitle,
       banner: response.data.banner,
       author: response.data.author,
       content: response.data.content,
